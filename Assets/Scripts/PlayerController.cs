@@ -1,11 +1,15 @@
+using Unity.Hierarchy;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     Rigidbody2D rb;
     private float inputHorizontal;
+    private int maxNumJumps;
+    private int numJumps;
     // because this is public, we have access to it in the Unity Editor
     public float horizontalMoveSpeed;
+    public float jumpForce;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -14,6 +18,7 @@ public class PlayerController : MonoBehaviour
         //this script is also attached to the player
         rb = GetComponent<Rigidbody2D>();
 
+        numJumps = maxNumJumps;
         //Debug.Log("Hello From Player Controller");
         //^This shows up in the console when the game is ran to make sure that it works!
     }
@@ -22,7 +27,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         movePlayerLateral();
-        //jump();
+        jump();
         //Debug.Log("Loopty Loop & Pull");
     }
 
@@ -35,7 +40,50 @@ public class PlayerController : MonoBehaviour
         // 1 - -> or D Pressed
         // 2 - <- or A Pressed
         inputHorizontal = Input.GetAxisRaw("Horizontal");
+        flipPlayerSprite(inputHorizontal);
 
         rb.linearVelocity = new Vector2(horizontalMoveSpeed * inputHorizontal, rb.linearVelocity.y);
+    }
+    private void flipPlayerSprite(float inputHorizontal)
+    {
+        //this will flip the player when they move left or right so they don't walk backwards
+        if (inputHorizontal > 0)
+        {
+            transform.eulerAngles = new Vector3 (0, 0, 0);
+        }
+        else if (inputHorizontal < 0)
+        {
+            transform.eulerAngles = new Vector3(0, 180, 0);
+        }
+    }
+
+    private void jump ()
+    {
+        if(Input.GetKeyDown(KeyCode.Space) && numJumps <= maxNumJumps)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            numJumps++;
+        }
+    }
+
+    //Collisions
+    //we can use this with all things we want to collide with the player
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        //collision will contain info about the object that the player collided with
+        //Debug.Log(collision.gameObject);
+        if(collision.gameObject.CompareTag("Ground"))
+        {
+            numJumps = maxNumJumps;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("TriangleCollectible"))
+        {
+            string fromTriangleCollectible = collision.gameObject.GetComponent<TriangleCollectible>().getTestString();
+            Debug.Log(fromTriangleCollectible);
+        }
     }
 }
