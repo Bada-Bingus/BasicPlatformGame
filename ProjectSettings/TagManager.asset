@@ -6,14 +6,20 @@ TagManager:
   tags:
   - Ground
   - TriangleCollectible
+  - DoubleJump
+  - WallMoveLeftBound
+  - WallMoveRightBound
+  - HarpoonLauncher
+  - HarpoonProjectile
+  - RedCollectable
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
+  - NoPlayerCollision
   - 
   - 
   - 

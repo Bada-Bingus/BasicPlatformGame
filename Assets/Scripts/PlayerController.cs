@@ -1,4 +1,7 @@
+using NUnit.Framework;
 using Unity.Hierarchy;
+using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -7,9 +10,19 @@ public class PlayerController : MonoBehaviour
     private float inputHorizontal;
     private int maxNumJumps;
     private int numJumps;
+    private bool hasHarpoonGun = false;
     // because this is public, we have access to it in the Unity Editor
     public float horizontalMoveSpeed;
     public float jumpForce;
+
+    public GameObject doubleJumpHatLocation;
+    public GameObject harpoonLocation;
+
+    //Harpoon Projectile Stuff
+    public GameObject projectilePrefab;
+    public Transform firepoint;
+    private GameObject projectile;
+    private bool facingRight;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -18,7 +31,8 @@ public class PlayerController : MonoBehaviour
         //this script is also attached to the player
         rb = GetComponent<Rigidbody2D>();
 
-        numJumps = maxNumJumps;
+        maxNumJumps = 1;
+        numJumps = 1;
         //Debug.Log("Hello From Player Controller");
         //^This shows up in the console when the game is ran to make sure that it works!
     }
@@ -28,6 +42,7 @@ public class PlayerController : MonoBehaviour
     {
         movePlayerLateral();
         jump();
+        shoot();
         //Debug.Log("Loopty Loop & Pull");
     }
 
@@ -42,6 +57,7 @@ public class PlayerController : MonoBehaviour
         inputHorizontal = Input.GetAxisRaw("Horizontal");
         flipPlayerSprite(inputHorizontal);
 
+        //velocity is time-based not frame-based, this prevents movement fuckery when framerate differs
         rb.linearVelocity = new Vector2(horizontalMoveSpeed * inputHorizontal, rb.linearVelocity.y);
     }
     private void flipPlayerSprite(float inputHorizontal)
@@ -50,10 +66,12 @@ public class PlayerController : MonoBehaviour
         if (inputHorizontal > 0)
         {
             transform.eulerAngles = new Vector3 (0, 0, 0);
+            facingRight = true;
         }
         else if (inputHorizontal < 0)
         {
             transform.eulerAngles = new Vector3(0, 180, 0);
+            facingRight = false;
         }
     }
 
@@ -66,6 +84,29 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void shoot ()
+    {
+        if (Input.GetKeyDown(KeyCode.P) && hasHarpoonGun)
+        {
+            Quaternion rotation;
+
+            if (facingRight)
+            {
+                rotation = Quaternion.Euler(0, 0, 0);
+                projectile = Instantiate(projectilePrefab, firepoint.position, rotation);
+            }
+            else
+            {
+                rotation = Quaternion.Euler(0, -180, 0);
+                projectile = Instantiate(projectilePrefab, firepoint.position, rotation);
+            }
+
+
+        }
+
+
+    }
+
     //Collisions
     //we can use this with all things we want to collide with the player
     private void OnCollisionEnter2D(Collision2D collision)
@@ -74,16 +115,45 @@ public class PlayerController : MonoBehaviour
         //Debug.Log(collision.gameObject);
         if(collision.gameObject.CompareTag("Ground"))
         {
-            numJumps = maxNumJumps;
+            foreach (ContactPoint2D contact in collision.contacts)
+            {
+                // Check if the player is landing on top
+                if (contact.normal.y > 0.5f)
+                {
+                    numJumps = 1;
+                    break; // No need to check the rest of the contacts
+                }
+            }
         }
     }
 
+    //triggers
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("TriangleCollectible"))
+        if (collision.gameObject.CompareTag("DoubleJump"))
         {
-            string fromTriangleCollectible = collision.gameObject.GetComponent<TriangleCollectible>().getTestString();
-            Debug.Log(fromTriangleCollectible);
+            GameObject hat = collision.gameObject;
+            equipDoubleJumpHat(hat);
+            maxNumJumps = 2;
+        }
+        else if (collision.gameObject.CompareTag("HarpoonLauncher"))
+        {
+            GameObject harpoon = collision.gameObject;
+            equipHarpoonGun(harpoon);
+            hasHarpoonGun = true;
         }
     }
+
+    private void equipDoubleJumpHat(GameObject hat)
+    {
+        hat.transform.position = doubleJumpHatLocation.transform.position;
+        hat.gameObject.transform.SetParent(this.gameObject.transform);
+    }
+
+    private void equipHarpoonGun(GameObject harpoon)
+    {
+        harpoon.transform.position = harpoonLocation.transform.position;
+        harpoon.gameObject.transform.SetParent(this.gameObject.transform);
+    }
+
 }
