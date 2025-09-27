@@ -12,6 +12,8 @@ TagManager:
   - HarpoonLauncher
   - HarpoonProjectile
   - RedCollectable
+  - OB
+  - OBbottom
   layers:
   - Default
   - TransparentFX

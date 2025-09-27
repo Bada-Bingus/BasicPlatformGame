@@ -32,7 +32,11 @@ public class CollectableController : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.CompareTag("OB"))
+        {
+            Destroy(this.gameObject);
+        }
+        else if (collision.gameObject.CompareTag("Player"))
         {
             Destroy(this.gameObject);
         }
@@ -41,5 +45,6 @@ public class CollectableController : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
+
     }
 }

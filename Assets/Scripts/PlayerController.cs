@@ -3,6 +3,7 @@ using Unity.Hierarchy;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -124,6 +125,10 @@ public class PlayerController : MonoBehaviour
                     break; // No need to check the rest of the contacts
                 }
             }
+        }
+        else if(collision.gameObject.CompareTag("OBbottom"))
+        {
+            SceneManager.LoadScene("DaScene");
         }
     }
 

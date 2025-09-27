@@ -70,4 +70,7 @@ public class CollectableSpawner : MonoBehaviour
         collectableToSpawn.transform.position = new Vector2(lowestYspawn.transform.position.x, Random.Range(lowestYspawn.transform.position.y, highestYspawn.transform.position.y));
 
     }
+
+
+   
 }
