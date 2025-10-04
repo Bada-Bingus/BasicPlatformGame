@@ -14,6 +14,7 @@ TagManager:
   - RedCollectable
   - OB
   - OBbottom
+  - Collectable
   layers:
   - Default
   - TransparentFX

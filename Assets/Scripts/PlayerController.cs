@@ -19,11 +19,18 @@ public class PlayerController : MonoBehaviour
     public GameObject doubleJumpHatLocation;
     public GameObject harpoonLocation;
 
+    public GameObject scoreManager;
+    private ScoreManagerGUI scoreManagerScript;
+
     //Harpoon Projectile Stuff
     public GameObject projectilePrefab;
     public Transform firepoint;
     private GameObject projectile;
     private bool facingRight;
+
+    //GUI
+    private int playerScore;
+    private int highScore;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -31,9 +38,14 @@ public class PlayerController : MonoBehaviour
         // I can only get this component because the RigidBody2D is attached to the Player
         //this script is also attached to the player
         rb = GetComponent<Rigidbody2D>();
+        scoreManagerScript = scoreManager.GetComponent<ScoreManagerGUI>();
 
         maxNumJumps = 1;
         numJumps = 1;
+
+        playerScore = 0;
+        highScore = 0;
+
         //Debug.Log("Hello From Player Controller");
         //^This shows up in the console when the game is ran to make sure that it works!
     }
@@ -132,7 +144,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    //triggers
+    //triggers (if you touch an object with a "Trigger"
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("DoubleJump"))
@@ -141,11 +153,34 @@ public class PlayerController : MonoBehaviour
             equipDoubleJumpHat(hat);
             maxNumJumps = 2;
         }
+
         else if (collision.gameObject.CompareTag("HarpoonLauncher"))
         {
             GameObject harpoon = collision.gameObject;
             equipHarpoonGun(harpoon);
             hasHarpoonGun = true;
+        }
+
+        else if (collision.gameObject.CompareTag("Collectable"))
+        {
+            GameObject collectable = collision.gameObject;
+            //set the gameobject tagged as collecrable to "collectable"
+
+            CollectableData cdScript = collectable.GetComponent<CollectableData>();
+            //get the script "CollectableDate" to get the objects data
+
+            int valueOfCollectable = cdScript.getCollectableValue();
+            //makes int "valueOfCollectable" and sets it's value to that of the collided collectable.
+
+            cdScript.destroyCollectable();
+            //destroy the collectable after it's touched
+
+            changePlayerScore(valueOfCollectable);
+            //changes the players score by the value of the collectable.
+
+            scoreManagerScript.setGUICurrentScore();
+            //changes the GUI to match the new score
+
         }
     }
 
@@ -161,4 +196,27 @@ public class PlayerController : MonoBehaviour
         harpoon.gameObject.transform.SetParent(this.gameObject.transform);
     }
 
+    public int getPlayerScore()
+    {
+        return playerScore;
+    }
+    public void setPlayerScore(int s)
+    {
+        playerScore = s;
+    }
+
+    public int getPlayerHighScore()
+    {
+        return highScore;
+    }
+    public void setPlayerHighScore(int s)
+    {
+        highScore = s;
+    }
+
+    public void changePlayerScore(int value)
+    {
+        playerScore += value;
+        Debug.Log("Score: " + playerScore);
+    }
 }

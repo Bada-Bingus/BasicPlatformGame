@@ -36,10 +36,6 @@ public class CollectableController : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
-        else if (collision.gameObject.CompareTag("Player"))
-        {
-            Destroy(this.gameObject);
-        }
 
         else if (collision.gameObject.CompareTag("HarpoonProjectile"))
         {
